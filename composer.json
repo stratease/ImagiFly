@@ -1,0 +1,23 @@
+{
+    "name": "stratease/image-builder",
+    "description": "PHP Image Filter library",
+    "authors": [
+        {
+            "name": "Edwin Daniels",
+            "email": "stratease@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=5.4.0",
+	"intervention/image": "dev-master"
+    },
+    "autoload":{
+        "psr-4":{
+            "stratease\\image-builder\\":"src/"
+        }
+    },
+    "repositories": [
+    ]
+}
