@@ -1,5 +1,6 @@
 <?php
 namespace stratease\imagebuilder;
+use Intervention\Image\Image;
 class Builder
 {
     public $baseWidth = null;
@@ -9,7 +10,6 @@ class Builder
     public $baseDirectories = [];
     public $cache = true;
     public $filters = [];
-    public $cacheDir = '';
     public $meta = null;
     public $cacheDir = '';
     public function __construct($baseDirs)
@@ -20,7 +20,7 @@ class Builder
         } else {
             $this->baseDirectories = $baseDirs;
         }
-        $this->meta = new stdClass();
+        $this->meta = new \stdClass();
     }
 
     public function baseImage($img)
