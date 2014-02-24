@@ -1,5 +1,5 @@
 <?php
-namespace stratease\ImageBuilder;
+namespace stratease\imagebuilder;
 class Builder
 {
     public $baseWidth = null;
