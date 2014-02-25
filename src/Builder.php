@@ -38,8 +38,11 @@ class Builder
     /**
      * @var string
      */
-    public $cacheDir = '';
-
+    public $cacheDir = '../.cache/';
+    /**
+     * @var int Seconds to live
+     */
+    public $cacheDuration = 3600;
     /**
      * @param $baseDirs
      */
@@ -278,11 +281,11 @@ class Builder
         $cacheId = sha1($this->filePath.json_encode($this->filters));
         $genFile = realpath($this->cacheDir).'/'.$cacheId.'.'.$ext;
         // are we using cache?
-        if($this->cache === false
-            || file_exists($genFile) === false) {
+        if(($this->cache === false
+            || file_exists($genFile) === false)
+        || ((filemtime($genFile) + $this->cacheDuration) < time())) {
             // get our main image resource...
             $image = Image::make($this->filePath);
-
             // apply the filters
             $image = $this->applyFilters($image, $this->filters);
             $image->save($genFile);
