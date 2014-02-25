@@ -3,15 +3,46 @@ namespace stratease\imagebuilder;
 use Intervention\Image\Image;
 class Builder
 {
+    /**
+     * @var null
+     */
     public $baseWidth = null;
+    /**
+     * @var null
+     */
     public $baseHeight = null;
+    /**
+     * @var null
+     */
     protected $baseImage = null;
+    /**
+     * @var null
+     */
     protected $filePath = null;
+    /**
+     * @var array
+     */
     public $baseDirectories = [];
+    /**
+     * @var bool
+     */
     public $cache = true;
+    /**
+     * @var array
+     */
     public $filters = [];
+    /**
+     * @var null|\stdClass
+     */
     public $meta = null;
+    /**
+     * @var string
+     */
     public $cacheDir = '';
+
+    /**
+     * @param $baseDirs
+     */
     public function __construct($baseDirs)
     {
         $this->cacheDir = __DIR__.'/../.cache/';
@@ -23,6 +54,11 @@ class Builder
         $this->meta = new \stdClass();
     }
 
+    /**
+     * @param $img
+     * @return $this
+     * @throws Exception
+     */
     public function baseImage($img)
     {
         $this->baseImage = $img;
@@ -44,17 +80,34 @@ class Builder
         $this->meta->mimetype = $data['mime'];
         return $this;
     }
+
+    /**
+     * @param $width
+     * @param $height
+     * @return $this
+     */
     public function baseSize($width, $height)
     {
         $this->baseHeight = $height;
         $this->baseWidth = $width;
         return $this;
     }
+
+    /**
+     * @param bool $bool
+     * @return $this
+     */
     public function cache($bool = true)
     {
         $this->cache = (bool)$bool;
         return $this;
     }
+
+    /**
+     * @param $func
+     * @param $args
+     * @return $this
+     */
     public function __call($func, $args)
     {
         $this->filters[] = ['filter' => $func,
@@ -62,6 +115,11 @@ class Builder
         return $this;
     }
 
+    /**
+     * @param $image
+     * @param $percent
+     * @return mixed
+     */
     protected function percResize($image, $percent)
     {
         $percent = $percent * .01;
@@ -71,11 +129,27 @@ class Builder
 
         return $image->resize($width, $height, true);
     }
+
+    /**
+     * @param $canvas
+     * @param $baseImage
+     * @param $filterName
+     * @param $args
+     * @return mixed
+     */
     public function applyFilter($canvas, $baseImage, $filterName, $args)
     {
         $args = array_merge([$canvas, $baseImage], $args);
         return call_user_func_array([$this, $filterName.'Filter'], $args);
     }
+
+    /**
+     * @param $canvas
+     * @param $baseImage
+     * @param $cnt
+     * @param string $style
+     * @return mixed
+     */
     public function overlayFilter($canvas, $baseImage, $cnt, $style = 'triangle')
     {
         $height = imagesy($canvas->resource);
@@ -163,6 +237,11 @@ class Builder
         return $canvas;
     }
 
+    /**
+     * @param $baseImage
+     * @param $filters
+     * @return Image|mixed
+     */
     public function applyFilters($baseImage, $filters)
     {
         // start with our canvas
@@ -187,6 +266,10 @@ class Builder
         }
         return $canvas;
     }
+
+    /**
+     * @return int
+     */
     public function output()
     {
         // build it's name, used for cache and non-cache use
