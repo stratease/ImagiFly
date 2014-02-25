@@ -157,33 +157,50 @@ class Builder
     {
         $height = imagesy($canvas->resource);
         $width = imagesx($canvas->resource);
-        if($style == 'left') {
+        $percBackground = .1;
+        if($style == 'left'
+            || $style == 'right') {
             if($cnt == 2) {
-                $img = $this->percResize(clone $baseImage,48);
-                $y = (int)(($height / 2) - (imagesy($img->resource) / 2));
-                $canvas->insert($img, 0, $y);
-                $img = $this->percResize(clone $baseImage, 56);
-                $x = (int)(($width / 2) - (imagesx($img->resource) / 2));
-                $canvas->insert($img, $x, $y);
+                $img = clone $baseImage;
+                $foreGroundImg = clone $baseImage;
+                // find out our box size aspect ratio...
+                if($width < $height) {
+                    $h = $height / 2;
+                    $xBox1 = (int) ($width - ($width * $percBackground));
+                    $yBox1 = (int) ($h - ($h * $percBackground));
+                    $xBox2 = (int) $width;
+                    $yBox2 = (int) $h;
+                } else {
+                    $w = $width / 2;
+                    $xBox1 = (int) ($w - ($w * $percBackground));
+                    $yBox1 = (int) ($height - ($height * $percBackground));
+                    $xBox2 = (int) $w;
+                    $yBox2 = (int) $height;
+                }
+                // resize
+                $img->resize($xBox1, $yBox1, true, true);
+                $foreGroundImg->resize($xBox2, $yBox2, true, true);
+                // shift for centering
+                $x2 = (int)(($width / 2) - (imagesx($foreGroundImg->resource) / 2));
+                $y2 = (int)(($height - imagesy($foreGroundImg->resource)) / 2);
+                $halfW = $width / 2;
+                $fourthW = $width / 4;
+                $x = (int)($fourthW - (imagesx($img->resource) / 2));
+                $y = (int)(($height - imagesy($img->resource)) / 2);
+                // place background images
+                if($style == 'left') {
+                    $canvas->insert($img, $x, $y);
+                } else {
+                    $canvas->insert($img, $x + $halfW, $y);
+                }
+                // place foreground
+                $canvas->insert($foreGroundImg, $x2, $y2);
             }
-        }
-        else if($style == 'right') {
-            if($cnt == 2) {
-                $img = $this->percResize(clone $baseImage,48);
-                $y = (int)(($height / 2) - (imagesy($img->resource) / 2));
-                $x = ($width - imagesx($img->resource));
-                $canvas->insert($img, $x, $y);
-                $img = $this->percResize(clone $baseImage, 56);
-                $x = (int)(($width / 2) - (imagesx($img->resource) / 2));
-                $canvas->insert($img, $x, $y);
-            }
-        }
-        else if($style == 'triangle') {
+        } else if($style == 'triangle') {
             switch($cnt) {
                 case 3:
                     $img = clone $baseImage;
                     $foreGroundImg = clone $baseImage;
-                    $percBackground = .1;
                     // find out our box size aspect ratio...
                     if($width < $height) {
                         $h = $height / 2;
@@ -215,11 +232,28 @@ class Builder
                     $canvas->insert($foreGroundImg, $x2, $y2);
                     break;
                 case 2:
-                    $img = $this->percResize(clone $baseImage,48);
-                    $y = (int)(($height / 2) - (imagesy($img->resource) / 2));
-                    $canvas->insert($img, 0, $y);
-                    $x = ($width - imagesx($img->resource));
+                    $img = clone $baseImage;
+
+                    // find out our box size aspect ratio...
+                    if($width < $height) {
+                        $h = $height / 2;
+                        $xBox1 = (int) ($width - ($width * $percBackground));
+                        $yBox1 = (int) ($h - ($h * $percBackground));
+                    } else {
+                        $w = $width / 2;
+                        $xBox1 = (int) ($w - ($w * $percBackground));
+                        $yBox1 = (int) ($height - ($height * $percBackground));
+                    }
+                    // resize
+                    $img->resize($xBox1, $yBox1, true, true);
+                    // shift for centering
+                    $halfW = $width / 2;
+                    $fourthW = $width / 4;
+                    $x = (int)($fourthW - (imagesx($img->resource) / 2));
+                    $y = (int)(($height - imagesy($img->resource)) / 2);
+                    // place background images
                     $canvas->insert($img, $x, $y);
+                    $canvas->insert($img, $x + $halfW, $y);
                     break;
                 case 1:
                 default:
