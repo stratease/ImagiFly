@@ -278,7 +278,7 @@ class Builder
         // build it's name, used for cache and non-cache use
         // file extension..
         $ext = substr($this->filePath, strrpos($this->filePath, ".") + 1);
-        $cacheId = sha1($this->filePath.json_encode($this->filters));
+        $cacheId = sha1($this->filePath.$this->baseHeight.$this->baseWidth.json_encode($this->filters));
         $genFile = realpath($this->cacheDir).'/'.$cacheId.'.'.$ext;
         // are we using cache?
         if(($this->cache === false
