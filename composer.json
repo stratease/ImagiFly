@@ -1,5 +1,5 @@
 {
-    "name": "stratease/imagebuilder",
+    "name": "stratease/ImageBuilder",
     "description": "PHP Image Filter library",
     "authors": [
         {
@@ -11,11 +11,11 @@
     "prefer-stable": true,
     "require": {
         "php": ">=5.4.0",
-	"intervention/image": "dev-master"
+	    "intervention/image": "dev-master"
     },
     "autoload":{
         "psr-4":{
-            "stratease\\imagebuilder\\":"src/"
+            "stratease\\ImageBuilder\\":"src/"
         }
     },
     "repositories": [
