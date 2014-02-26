@@ -1,26 +1,33 @@
 <?php
 namespace stratease\ImageBuilder\Filter;
-use Intervention\Image\Image;
 class Overlay implements FilterInterface
 {
 
-    public function __construct($canvas, $baseImage)
+    /**
+     * @param Image $canvas
+     * @param Image $baseImage
+     */
+    public function __construct(\Intervention\Image\Image $canvas, \Intervention\Image\Image $baseImage)
     {
         $this->canvas = $canvas;
-        $this->baseImage = $baseImage;
+        $this->baseImage = clone $baseImage;
     }
 
-
+    /**
+     * @param $cnt
+     * @param string $style
+     * @return \Intervention\Image\Image - The modified canvas object;
+     */
     public function filter( $cnt, $style = 'triangle')
     {
-        $height = imagesy($canvas->resource);
-        $width = imagesx($canvas->resource);
+        $height = imagesy($this->canvas->resource);
+        $width = imagesx($this->canvas->resource);
         $percBackground = .0;
         if($style == 'left'
             || $style == 'right') {
             if($cnt == 2) {
-                $img = clone $baseImage;
-                $foreGroundImg = clone $baseImage;
+                $img = clone $this->baseImage;
+                $foreGroundImg = clone $this->baseImage;
                 // find out our box size aspect ratio...
                 if($width < $height) {
                     $h = $height / 2;
@@ -47,18 +54,18 @@ class Overlay implements FilterInterface
                 $y = (int)(($height - imagesy($img->resource)) / 2);
                 // place background images
                 if($style == 'left') {
-                    $canvas->insert($img, $x, $y);
+                    $this->canvas->insert($img, $x, $y);
                 } else {
-                    $canvas->insert($img, $x + $halfW, $y);
+                    $this->canvas->insert($img, $x + $halfW, $y);
                 }
                 // place foreground
-                $canvas->insert($foreGroundImg, $x2, $y2);
+                $this->canvas->insert($foreGroundImg, $x2, $y2);
             }
         } else if($style == 'triangle') {
             switch($cnt) {
                 case 3:
-                    $img = clone $baseImage;
-                    $foreGroundImg = clone $baseImage;
+                    $img = clone $this->baseImage;
+                    $foreGroundImg = clone $this->baseImage;
                     // find out our box size aspect ratio...
                     if($width < $height) {
                         $h = $height / 2;
@@ -72,7 +79,7 @@ class Overlay implements FilterInterface
 
                     // resize
                     $img->resize($xBox1, $yBox1, true, true);
-                    var_dump($width, $height, $xBox1, $yBox1, imagesx($img->resource), imagesy($img->resource));exit;
+
                     // shift for centering
                     $x2 = (int)(($width / 2) - (imagesx($foreGroundImg->resource) / 2));
                     $y2 = (int)(($height - imagesy($foreGroundImg->resource)) / 2);
@@ -81,13 +88,13 @@ class Overlay implements FilterInterface
                     $x = (int)($fourthW - (imagesx($img->resource) / 2));
                     $y = (int)(($height - imagesy($img->resource)) / 2);
                     // place background images
-                    $canvas->insert($img, $x, $y);
-                    $canvas->insert($img, $x + $halfW, $y);
+                    $this->canvas->insert($img, $x, $y);
+                    $this->canvas->insert($img, $x + $halfW, $y);
                     // place foreground
-                    $canvas->insert($foreGroundImg, $x2, $y2);
+                    $this->canvas->insert($foreGroundImg, $x2, $y2);
                     break;
                 case 2:
-                    $img = clone $baseImage;
+                    $img = clone $this->baseImage;
 
                     // find out our box size aspect ratio...
                     if($width < $height) {
@@ -107,12 +114,12 @@ class Overlay implements FilterInterface
                     $x = (int)($fourthW - (imagesx($img->resource) / 2));
                     $y = (int)(($height - imagesy($img->resource)) / 2);
                     // place background images
-                    $canvas->insert($img, $x, $y);
-                    $canvas->insert($img, $x + $halfW, $y);
+                    $this->canvas->insert($img, $x, $y);
+                    $this->canvas->insert($img, $x + $halfW, $y);
                     break;
                 case 1:
                 default:
-                    return $baseImage;
+                    return $this->baseImage;
             }
         }
         // todo Ditch the hardcoded stuff... started algorithm below
@@ -146,10 +153,10 @@ class Overlay implements FilterInterface
             // how many images for this row?
             for($n = 0; $n < $rows[$i]; $n++) {
                 // @todo - this is wrong, fix the row image inserts...
-                // $canvas->insert($img, $n * 10, $n * 10);
+                // $this->canvas->insert($img, $n * 10, $n * 10);
             }
         }*/
 
-        return $canvas;
+        return $this->canvas;
     }
 }
