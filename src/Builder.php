@@ -98,11 +98,15 @@ class Builder
 
     /**
      * @param bool $bool
+     * @param null $dir
      * @return $this
      */
-    public function cache($bool = true)
+    public function cache($bool = true, $dir = null)
     {
         $this->cache = (bool)$bool;
+        if($dir !== null) {
+            $this->cacheDir = $dir;
+        }
         return $this;
     }
 
