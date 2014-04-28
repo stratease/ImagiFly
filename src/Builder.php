@@ -182,9 +182,10 @@ class Builder
     }
 
     /**
-     * @return int
+     * @param null Optionally pass a symfony response object to be returned with appropriate headers and image content
+     * @return int|Response
      */
-    public function output()
+    public function output($response = null)
     {
         // build it's name, used for cache and non-cache use
         // file extension..
@@ -201,8 +202,18 @@ class Builder
             $image = $this->applyFilters($image, $this->filters);
             $image->save($genFile);
         }
-        header('Content-Type:'.$this->meta->mimetype);
-        header('Content-Length: ' . filesize($genFile));
-        return readfile($genFile);
+        if($response === null) {
+            header('Content-Type:'.$this->meta->mimetype);
+            header('Content-Length: ' . filesize($genFile));
+
+            return readfile($genFile);
+        } else {
+            $response->headers->set('Content-Type', $this->meta->mimetype);
+            $response->headers->set('Content-Length', filesize($genFile));
+            $response->sendHeaders();
+            $response->setContent(readfile($genFile));
+
+            return $response;
+        }
     }
 }
