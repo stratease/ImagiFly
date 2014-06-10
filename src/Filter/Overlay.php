@@ -1,18 +1,8 @@
 <?php
 namespace stratease\ImageBuilder\Filter;
-class Overlay implements FilterInterface
+use stratease\ImageBuilder\Filter\BaseFilter;
+class Overlay extends BaseFilter
 {
-
-    /**
-     * @param Image $canvas
-     * @param Image $baseImage
-     */
-    public function __construct(\Intervention\Image\Image $canvas, \Intervention\Image\Image $baseImage)
-    {
-        $this->canvas = $canvas;
-        $this->baseImage = clone $baseImage;
-    }
-
     /**
      * @param $cnt
      * @param string $style
@@ -158,5 +148,10 @@ class Overlay implements FilterInterface
         }*/
 
         return $this->canvas;
+    }
+
+    public static function getFilterMask()
+    {
+        return 'overlay';
     }
 }

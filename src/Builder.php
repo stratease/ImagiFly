@@ -1,98 +1,86 @@
 <?php
 namespace stratease\ImageBuilder;
 use Intervention\Image\Image;
-class Builder
+use stratease\ImageBuilder\Util\ConfigurableObject;
+use stratease\ImageBuilder\Filter\Resize;
+use stratease\ImageBuilder\Util\File;
+use Symfony\Component\Finder\Tests\Expression\RegexTest;
+
+class Builder extends ConfigurableObject
 {
     /**
      * @var null
      */
-    public $baseWidth = null;
+    protected $baseWidth = null;
+    /**
+     * @var RequestParserInterface
+     */
+    protected $requestParser = null;
     /**
      * @var null
      */
-    public $baseHeight = null;
+    protected $baseHeight = null;
     /**
      * @var null
      */
     protected $baseImage = null;
-    /**
-     * @var null
-     */
-    protected $filePath = null;
+
     /**
      * @var array
      */
-    public $baseDirectories = [];
+    protected $baseDirectory = [];
     /**
      * @var bool
      */
-    public $cache = true;
+    protected $cache = true;
     /**
      * @var array
      */
-    public $filters = [];
+    protected $filters = [];
     /**
      * @var null|\stdClass
      */
-    public $meta = null;
+    protected $imageFile = null;
     /**
-     * @var string
+     * @var string sys temp dir
      */
-    public $cacheDir = '../.cache/';
+    protected $cacheDirectory = null;
     /**
      * @var int Seconds to live
      */
-    public $cacheDuration = 3600;
-    /**
-     * @param $baseDirs
-     */
-    public function __construct($baseDirs)
+    protected $cacheDuration = 3600;
+
+    public function __construct(array $options = [])
     {
-        $this->cacheDir = __DIR__.'/../.cache/';
-        if(is_string($baseDirs)) {
-            $this->baseDirectories = [$baseDirs];
-        } else {
-            $this->baseDirectories = $baseDirs;
-        }
-        $this->meta = new \stdClass();
+        // default to systems tmp dir
+        $this->cacheDirectory = sys_get_temp_dir();
+        parent::__construct($options);
     }
 
+    public function setBaseDirectory($dir)
+    {
+        // should be array
+        if(is_string($dir)) {
+            $dir = [$dir];
+        }
+        $this->baseDirectory = $dir;
+    }
+    public function setRequestParser(RequestParserInterface $parser)
+    {
+        $this->requestParser = $parser;
+
+        return $this;
+    }
     /**
      * @param $img
      * @return $this
-     * @throws Exception
+     * @throws \Exception
      */
-    public function baseImage($img)
+    public function setBaseImage($img)
     {
-        $this->baseImage = $img;
-        $this->filePath = null; // clear it out..
-        foreach($this->baseDirectories as $dir) {
-            if(is_file($dir.'/'.$this->baseImage)) {
-                $this->filePath = realpath($dir.'/'.$this->baseImage);
-                break;
-            }
-        }
-        // find our file?
-        if($this->filePath === null) {
-            throw new Exception('Could not locate base image! ('.$this->baseImage.')');
-        }
-        // Array ( [0] => 183 [1] => 313 [2] => 3 [3] => width="183" height="313" [bits] => 8 [mime] => image/png )
-        $data = getimagesize($this->filePath);
-        $this->meta->height = $data[1];
-        $this->meta->width = $data[0];
-        $this->meta->mimetype = $data['mime'];
-        return $this;
-    }
 
-    /**
-     * @param $width
-     * @param $height
-     * @return $this
-     */
-    public function baseSize($width, $height)
-    {
-        $this->baseHeight = $height;
-        $this->baseWidth = $width;
+        $this->baseImage = $img;
+
         return $this;
     }
 
@@ -101,16 +89,24 @@ class Builder
      * @param null $dir
      * @return $this
      */
-    public function cache($bool = true, $dir = null)
+    public function setCache($bool = true, $dir = null)
     {
         $this->cache = (bool)$bool;
         if($dir !== null) {
-            $this->cacheDir = $dir;
+            $this->setCacheDirectory($dir);
         }
         return $this;
     }
 
+    public function setCacheDirectory($dir)
+    {
+        $this->cacheDirectory = $dir;
+
+        return $this;
+    }
+
     /**
+     * Queues filters to be run on output
      * @param $func
      * @param $args
      * @return $this
@@ -119,6 +115,7 @@ class Builder
     {
         $this->filters[] = ['filter' => $func,
             'args' => $args];
+
         return $this;
     }
 
@@ -127,7 +124,7 @@ class Builder
      * @param $percent
      * @return mixed
      */
-    protected function percResize($image, $percent)
+    protected function percentResize($image, $percent)
     {
         $percent = $percent * .01;
         // find the percent of the orig values..
@@ -138,82 +135,200 @@ class Builder
     }
 
     /**
-     * @param $canvas
-     * @param $baseImage
-     * @param $filterName
-     * @param $args
-     * @return mixed
+     * @param $canvas Image The modifiable canvas
+     * @param $baseImage Image The original image object
+     * @param $filter FilterInterface the filter
+     * @param $args array arguments, passed down to the filters filter method
+     * @return Image canvas after filter has been applied
+     * @throws \ErrorException
      */
-    public function applyFilter($canvas, $baseImage, $filterName, $args)
+    public function applyFilter(Image $canvas, Image $baseImage, $filter, array $args = [])
     {
-        $filterName = __NAMESPACE__.'\Filter\\'.ucwords($filterName);
-        $filter = new $filterName($canvas, $baseImage);
+
+        $filter = clone $filter;
+        // setup filter object...
+        $filter->setCanvas($canvas);
+        $filter->setBaseImage($baseImage);
+
+        // run filter
         return call_user_func_array([$filter, 'filter'], $args);
     }
 
-    /**
-     * @param $baseImage
-     * @param $filters
-     * @return Image|mixed
-     */
-    public function applyFilters($baseImage, $filters)
+    public function addFilterExtension($filterName, FilterInterface $object)
     {
-        // start with our canvas
-        if($this->baseHeight !== null) { // specified height?
-            $height = $this->baseHeight;
-            $width = $this->baseWidth;
-        } else { // assume 100% of base image
-            $width = $this->meta->width;
-            $height = $this->meta->height;
+        $this->filterExtensions[$filterName] = $object;
+
+        return $this;
+    }
+    public function getFilterExtension($filterName)
+    {
+        return isset($this->filterExtensions[$filterName]) ? $this->filterExtensions[$filterName] : null;
+    }
+    public function getFilter($filterName)
+    {
+        // special size setter filter
+        // @todo clean Size filter up... should hook into main filter loader.
+        // @todo ..It has a unique filter mask, so we need to update the mask system to build appropriately
+        if(preg_match(Resize::getFilterMask(), $filterName, $matches)) {
+
+            return new Resize();
         }
-        $canvas = Image::canvas($width, $height);
-        // resize base
-        $baseImage->resize($width, $height, true, true);
-        if(count($filters)) {
-            foreach($filters as $filter) {
-                // write filter to our current canvas
-                $canvas = $this->applyFilter($canvas, $baseImage, $filter['filter'], $filter['args']);
-            }
+        // extension ?
+        if($filterObj = $this->getFilterExtension($filterName)) {
+
+            return $filterObj;
         } else {
-            // no filters, just apply image
-            $canvas->insert($baseImage);
+            $class = __NAMESPACE__.'\Filter\\'.ucwords($filterName);
+
+            if(class_exists($class)) {
+
+                return new $class();
+            }
+            else {
+
+                throw new \ErrorException("Unable to locate the filter '".$filterName."'", E_USER_ERROR);
+            }
+
+        }
+    }
+
+    /**
+     * @param $canvas Image
+     * @param $baseImage Image
+     * @param $filters array
+     * @return Image
+     */
+    public function applyFilters(Image $canvas, Image $baseImage, $filters)
+    {
+        $baseImageWritten = false;
+        foreach($filters as $filter) {
+            // build filter object...
+            if($filterObj = $this->getFilter($filter['filter'])) {
+                // build args off parsed filter
+                $fArgs = $filterObj->buildArgs($filter);
+                // write filter to our current canvas
+                $canvas = $this->applyFilter($canvas, $baseImage, $filterObj, $fArgs);
+                // check filter flags
+                if(!$baseImageWritten) {
+                    $baseImageWritten = $filterObj->writesBaseImageToCanvas();
+                }
+            }
+        }
+
+        // if no filters wrote the base image on the canvas, we presume that should always be done.. do it now.
+        if($baseImageWritten === false) {
+            $canvas->insert($baseImage, 0, 0); // should we center?
         }
         return $canvas;
     }
 
-    /**
-     * @param null Optionally pass a symfony response object to be returned with appropriate headers and image content
-     * @return int|Response
-     */
-    public function output($response = null)
+    public function generateCanvas($width, $height)
     {
-        // build it's name, used for cache and non-cache use
-        // file extension..
-        $ext = substr($this->filePath, strrpos($this->filePath, ".") + 1);
-        $cacheId = sha1($this->filePath.$this->baseHeight.$this->baseWidth.json_encode($this->filters));
-        $genFile = realpath($this->cacheDir).'/'.$cacheId.'.'.$ext;
-        // are we using cache?
-        if(($this->cache === false
-            || file_exists($genFile) === false)
-        || ((filemtime($genFile) + $this->cacheDuration) < time())) {
-            // get our main image resource...
-            $image = Image::make($this->filePath);
-            // apply the filters
-            $image = $this->applyFilters($image, $this->filters);
-            $image->save($genFile);
-        }
-        if($response === null) {
-            header('Content-Type:'.$this->meta->mimetype);
-            header('Content-Length: ' . filesize($genFile));
 
-            return readfile($genFile);
+    }
+
+    public function getBaseFile()
+    {
+        $filePath = null;
+        if(!($baseImage = $this->baseImage)) {
+            if($this->requestParser == null) {
+                throw new \Exception("No base image defined!", E_USER_ERROR);
+            } else {
+                $baseImage = $this->requestParser->getRequestedImage();
+            }
+        }
+        foreach($this->baseDirectory as $dir) {
+            if(is_file($dir.'/'.$baseImage)) {
+                $filePath = realpath($dir.'/'.$baseImage);
+                break;
+            }
+        }
+
+        // find our file?
+        if($filePath === null) {
+            throw new \Exception('Could not locate image \''.$baseImage.'\'. Looked in '.implode(", ", $this->baseDirectory), E_USER_ERROR);
+        }
+
+        return $filePath;
+    }
+    public function compile()
+    {
+        $filePath = $this->getBaseFile();
+        // get file meta data...
+        $imageFile = new File($filePath);
+
+        // get our main image resource...
+        $image = Image::make($imageFile->getPath());
+        // start with base image size
+        $canvas = Image::canvas($imageFile->getWidth(), $imageFile->getHeight());
+
+        // apply the filters
+        $image = $this->applyFilters($canvas, $image, $this->getFilters());
+
+        // now save the image
+        $genFile = $this->generateFileName();
+        $image->save($genFile);
+
+        return $this;
+    }
+
+    public function getFilters()
+    {
+        if(count($this->filters)) {
+            $filters = $this->filters;
         } else {
-            $response->headers->set('Content-Type', $this->meta->mimetype);
-            $response->headers->set('Content-Length', filesize($genFile));
-            $response->sendHeaders();
-            $response->setContent(readfile($genFile));
-
-            return $response;
+            $filters = [];
         }
+
+        if($this->requestParser != null) {
+            // request parser? merge filters...
+            if($rFilters = $this->requestParser->getRequestedFilters()) {
+
+                return array_merge($filters, $rFilters);
+            }
+        }
+
+        return $filters;
+    }
+
+    protected function generateFileName()
+    {
+        $filePath = $this->getBaseFile();
+        // file extension..
+        $ext = substr($filePath, strrpos($filePath, ".") + 1);
+        // should be unique id for this file + filters
+        $imgId = sha1($filePath.json_encode($this->getFilters()));
+        // build generated file
+        $genFile = realpath($this->cacheDirectory).'/'.$imgId.'.'.$ext;
+
+        return $genFile;
+    }
+
+    /**
+     * @return this
+     */
+    public function output()
+    {
+        $genFile = $this->generateFileName();
+
+        // are we using cache?
+        if($this->cache === false // not cacheing ?
+            || file_exists($genFile) === false // file doesn't exist ?
+            // or we are cacheing, but need to check expiration...
+        || ($this->cache === true
+                && ((filemtime($genFile) + $this->cacheDuration) < time()))) {
+            $this->compile();
+        }
+
+        $filePath = $this->getBaseFile();
+        // get file meta data...
+        $imageFile = new File($filePath);
+
+        // output stuff..
+        header('Content-Type:'.$imageFile->getMimeType());
+        header('Content-Length: ' . filesize($genFile));
+        readfile($genFile);
+
+        return $this;
     }
 }
