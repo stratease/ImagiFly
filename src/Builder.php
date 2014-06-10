@@ -4,6 +4,7 @@ use Intervention\Image\Image;
 use stratease\ImageBuilder\Util\ConfigurableObject;
 use stratease\ImageBuilder\Filter\Resize;
 use stratease\ImageBuilder\Util\File;
+use stratease\ImageBuilder\Filter\FilterInterface;
 use Symfony\Component\Finder\Tests\Expression\RegexTest;
 
 class Builder extends ConfigurableObject
@@ -50,6 +51,9 @@ class Builder extends ConfigurableObject
      */
     protected $cacheDuration = 3600;
 
+    /**
+     * @param array $options
+     */
     public function __construct(array $options = [])
     {
         // default to systems tmp dir
@@ -57,6 +61,9 @@ class Builder extends ConfigurableObject
         parent::__construct($options);
     }
 
+    /**
+     * @param string|array $dir
+     */
     public function setBaseDirectory($dir)
     {
         // should be array
@@ -65,6 +72,11 @@ class Builder extends ConfigurableObject
         }
         $this->baseDirectory = $dir;
     }
+
+    /**
+     * @param RequestParserInterface $parser
+     * @return $this
+     */
     public function setRequestParser(RequestParserInterface $parser)
     {
         $this->requestParser = $parser;
@@ -98,6 +110,10 @@ class Builder extends ConfigurableObject
         return $this;
     }
 
+    /**
+     * @param $dir
+     * @return $this
+     */
     public function setCacheDirectory($dir)
     {
         $this->cacheDirectory = $dir;
@@ -135,14 +151,14 @@ class Builder extends ConfigurableObject
     }
 
     /**
-     * @param $canvas Image The modifiable canvas
-     * @param $baseImage Image The original image object
-     * @param $filter FilterInterface the filter
-     * @param $args array arguments, passed down to the filters filter method
+     * @param Image $canvas  The modifiable canvas
+     * @param Image $baseImage The original image object
+     * @param FilterInterface $filter the filter
+     * @param array $args arguments, passed down to the filters filter method
      * @return Image canvas after filter has been applied
-     * @throws \ErrorException
+     * @throws \Exception
      */
-    public function applyFilter(Image $canvas, Image $baseImage, $filter, array $args = [])
+    public function applyFilter(Image $canvas, Image $baseImage, FilterInterface $filter, array $args = [])
     {
 
         $filter = clone $filter;
@@ -150,20 +166,43 @@ class Builder extends ConfigurableObject
         $filter->setCanvas($canvas);
         $filter->setBaseImage($baseImage);
 
+        $callable = [$filter, 'filter'];
         // run filter
-        return call_user_func_array([$filter, 'filter'], $args);
+        if(is_callable($callable)) {
+
+            return call_user_func_array($callable, $args);
+        } else {
+
+            throw new \Exception("Filter '".get_class($filter)."' must define a 'filter' method to accept filter arguments.");
+        }
     }
 
+    /**
+     * @param string $filterName
+     * @param FilterInterface $object
+     * @return $this
+     */
     public function addFilterExtension($filterName, FilterInterface $object)
     {
         $this->filterExtensions[$filterName] = $object;
 
         return $this;
     }
+
+    /**
+     * @param $filterName
+     * @return FilterInterface
+     */
     public function getFilterExtension($filterName)
     {
         return isset($this->filterExtensions[$filterName]) ? $this->filterExtensions[$filterName] : null;
     }
+
+    /**
+     * @param $filterName
+     * @return FilterInterface
+     * @throws \ErrorException
+     */
     public function getFilter($filterName)
     {
         // special size setter filter
@@ -222,11 +261,10 @@ class Builder extends ConfigurableObject
         return $canvas;
     }
 
-    public function generateCanvas($width, $height)
-    {
-
-    }
-
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function getBaseFile()
     {
         $filePath = null;
@@ -251,6 +289,10 @@ class Builder extends ConfigurableObject
 
         return $filePath;
     }
+
+    /**
+     * @return $this
+     */
     public function compile()
     {
         $filePath = $this->getBaseFile();
@@ -272,6 +314,9 @@ class Builder extends ConfigurableObject
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function getFilters()
     {
         if(count($this->filters)) {
@@ -291,6 +336,9 @@ class Builder extends ConfigurableObject
         return $filters;
     }
 
+    /**
+     * @return string
+     */
     protected function generateFileName()
     {
         $filePath = $this->getBaseFile();
@@ -305,7 +353,7 @@ class Builder extends ConfigurableObject
     }
 
     /**
-     * @return this
+     * @return $this
      */
     public function output()
     {

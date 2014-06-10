@@ -7,21 +7,35 @@ namespace stratease\ImageBuilder;
 
 
 use stratease\ImageBuilder\Util\ConfigurableObject;
-class RequestParser extends ConfigurableObject implements RequestParserInterface {
+class RequestParser extends ConfigurableObject implements RequestParserInterface
+{
     protected $pathPrepend = 'image-builder';
     protected $requestPath = null;
     protected $filterParamSplit = ':';
 
+    /**
+     * @return string
+     */
     public function getFilterParamSplit()
     {
         return $this->filterParamSplit;
     }
+
+    /**
+     * @param string $splitChar The char that separates each filters argument
+     * @return $this
+     */
     public function setFilterParamSplit($splitChar)
     {
         $this->filterParamSplit = $splitChar;
 
         return $this;
     }
+
+    /**
+     * @param string $prepend  The initial path to denote image parser, typically "image-builder"
+     * @return $this
+     */
     public function setPathPrepend($prepend)
     {
         $this->pathPrepend = trim($prepend, '/');
@@ -29,30 +43,49 @@ class RequestParser extends ConfigurableObject implements RequestParserInterface
         return $this;
     }
 
+    /**
+     * @param string $path  The full request URI path
+     * @return $this
+     */
     public function setRequestPath($path)
     {
         $this->requestPath = $path;
 
         return $this;
     }
+
+    /**
+     * @return string
+     */
     public function getRequestPath()
     {
         return $this->requestPath;
     }
+
+    /**
+     * @return string
+     */
     public function getPathPrepend()
     {
         return $this->pathPrepend;
     }
 
 
+    /**
+     * @return mixed|string
+     * @throws \Exception
+     */
     public function getRequestedImage()
     {
-
+        if($this->requestPath == null) {
+            throw new \Exception("The 'requestPath' is undefined!");
+        }
         // strip out the file path...
         $path = str_replace($this->pathPrepend, '', $this->requestPath);
         $extPos = strpos($path, '.'); // find the file extension;
-        $endFilePos = strpos($path, '/', $extPos);
-        $path = substr($path, 0, $endFilePos);
+        if($endFilePos = strpos($path, '/', $extPos)) {
+            $path = substr($path, 0, $endFilePos);
+        }
 
         // clean up
         $path = str_replace('//', '/', $path);
@@ -60,8 +93,15 @@ class RequestParser extends ConfigurableObject implements RequestParserInterface
         return $path;
     }
 
+    /**
+     * @return array An array of the filters in the format of ['filter' => 'filter-mask', 'args' => ['arg1', 'arg2']]
+     * @throws \Exception
+     */
     public function getRequestedFilters()
     {
+        if($this->requestPath == null) {
+            throw new \Exception("The 'requestPath' is undefined!");
+        }
         $filters = [];
         // strip file path off..
         $filterPath = str_replace($this->getRequestedImage(), '', str_replace($this->pathPrepend, '', $this->requestPath));
@@ -81,18 +121,3 @@ class RequestParser extends ConfigurableObject implements RequestParserInterface
         return $filters;
     }
 }
-
-// $url = $_SERVER['REQUEST_URI']; // /img-bldr/natural-cleanse/bottle.jpg/200x200/overlay:3
-
-
-/*
- $bldr->setBaseImage($fileName);
-// size first...
-if(isset($width)) {
-    $bldr->setBaseSize($width, $height);
-}
-// then the rest of the filters
-foreach($filters as $filter) {
-    $bldr = call_user_func_array([$bldr, $filter['name']], $filter['args']);
-}
-*/
