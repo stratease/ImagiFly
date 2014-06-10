@@ -11,7 +11,7 @@
     "prefer-stable": true,
     "require": {
         "php": ">=5.4.0",
-	    "intervention/image": "dev-master"
+	    "intervention/image": "dev-master#606228bc7614105125d0e65b4187d5e436facf76"
     },
     "autoload":{
         "psr-4":{
