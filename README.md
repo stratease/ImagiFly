@@ -19,7 +19,13 @@ Next is the path to the image `/path/to/my/file.png`. These should typically be 
 
 And finally there are 2 filters being applied to this image. A special resizing filter `/225x225/` which denotes a 225 pixel width and 225 pixel height, respectively. Followed by `/overlay:2/` an overlay filter, specifying 2 duplicates of the original image to be positioned next to each other.
 
-If we had used an original image of (https://github.com/stratease/ImageBuilder/raw/master/demo/images/chipmunks-are-awesome.png "Example 1") the results of using the path would be (https://github.com/stratease/ImageBuilder/raw/master/demo/parsed-chipmunk.png "Example 1")
+If we had used an original image of ...
+
+![original file](https://github.com/stratease/ImageBuilder/raw/master/demo/images/chipmunks-are-awesome.png)
+
+... after utilizing ImageBuilder's filter path, the resulting image would be 
+
+![parsed file](https://github.com/stratease/ImageBuilder/raw/master/demo/parsed-chipmunk.png)
 
 
 Setup
