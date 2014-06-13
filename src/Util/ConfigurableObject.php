@@ -1,6 +1,6 @@
 <?php
 
-namespace stratease\ImageBuilder\Util;
+namespace stratease\ImagiFly\Util;
 
 
 class ConfigurableObject {

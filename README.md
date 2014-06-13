@@ -1,4 +1,4 @@
-ImageBuilder
+ImagiFly
 =============
 
 PHP Library to process images through any number of filter effects, based on a single source image. Web API Inspired by https://github.com/imsky/holder
@@ -21,16 +21,16 @@ And finally there are 2 filters being applied to this image. A special resizing 
 
 If we had used an original image of ...
 
-![original file](https://github.com/stratease/ImageBuilder/raw/master/demo/images/chipmunks-are-awesome.png)
+![original file](https://github.com/stratease/ImagiFly/raw/master/demo/images/chipmunks-are-awesome.png)
 
-... after utilizing ImageBuilder's filter path, the resulting image would be 
+... after utilizing ImagiFly's filter path, the resulting image would be
 
-![parsed file](https://github.com/stratease/ImageBuilder/raw/master/demo/parsed-chipmunk.png)
+![parsed file](https://github.com/stratease/ImagiFly/raw/master/demo/parsed-chipmunk.png)
 
 
 Setup
 -----
-Check out our [demo](https://github.com/stratease/ImageBuilder/tree/master/demo) to see an example setup.
+Check out our [demo](https://github.com/stratease/ImagiFly/tree/master/demo) to see an example setup.
 
 It's important to note that on the backend we have a server directive to route to our PHP image builder file based on the `/image-builder/...` path.
 
@@ -48,8 +48,8 @@ This redirects to our backend script that handles the route parsing and image ma
 
 ``` php
 
-use stratease\ImageBuilder\Builder;
-use stratease\ImageBuilder\RequestParser;
+use stratease\ImagiFly\Builder;
+use stratease\ImagiFly\RequestParser;
 require_once("../vendor/autoload.php");
 require_once("PinkFilter.php");
 
@@ -70,4 +70,4 @@ $builder->output(); // This will compile and output the image.
 
 ```
 
-This implementation also has an example of how to setup a [custom filter](https://github.com/stratease/ImageBuilder/raw/master/demo/PinkFilter.php). Refer to the [FilterInterface](https://github.com/stratease/ImageBuilder/blob/master/src/Filter/FilterInterface.php) for further documentation.
+This implementation also has an example of how to setup a [custom filter](https://github.com/stratease/ImagiFly/raw/master/demo/PinkFilter.php). Refer to the [FilterInterface](https://github.com/stratease/ImagiFly/blob/master/src/Filter/FilterInterface.php) for further documentation.

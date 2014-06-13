@@ -5,8 +5,8 @@
  *
  */
 
-use stratease\ImageBuilder\Builder;
-use stratease\ImageBuilder\RequestParser;
+use stratease\ImagiFly\Builder;
+use stratease\ImagiFly\RequestParser;
 require_once("../vendor/autoload.php");
 require_once("PinkFilter.php");
 

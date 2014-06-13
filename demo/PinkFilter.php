@@ -1,6 +1,6 @@
 <?php
 
-use stratease\ImageBuilder\Filter\BaseFilter;
+use stratease\ImagiFly\Filter\BaseFilter;
 use Intervention\Image\ImageManagerStatic;
 class PinkFilter extends BaseFilter {
 

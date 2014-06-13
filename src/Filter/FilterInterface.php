@@ -1,6 +1,6 @@
 <?php
 
-namespace stratease\ImageBuilder\Filter;
+namespace stratease\ImagiFly\Filter;
 
 
 interface FilterInterface {

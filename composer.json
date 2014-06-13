@@ -1,5 +1,5 @@
 {
-    "name": "stratease/ImageBuilder",
+    "name": "stratease/ImagiFly",
     "description": "PHP Image Filter library",
     "authors": [
         {
@@ -15,7 +15,7 @@
     },
     "autoload":{
         "psr-4":{
-            "stratease\\ImageBuilder\\":"src/"
+            "stratease\\ImagiFly\\":"src/"
         }
     },
     "repositories": [

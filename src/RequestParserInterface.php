@@ -1,6 +1,6 @@
 <?php
 
-namespace stratease\ImageBuilder;
+namespace stratease\ImagiFly;
 
 
 interface RequestParserInterface {

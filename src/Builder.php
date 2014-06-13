@@ -1,11 +1,11 @@
 <?php
-namespace stratease\ImageBuilder;
+namespace stratease\ImagiFly;
 use Intervention\Image\ImageManagerStatic;
 use Intervention\Image\Image;
-use stratease\ImageBuilder\Util\ConfigurableObject;
-use stratease\ImageBuilder\Filter\Resize;
-use stratease\ImageBuilder\Util\File;
-use stratease\ImageBuilder\Filter\FilterInterface;
+use stratease\ImagiFly\Util\ConfigurableObject;
+use stratease\ImagiFly\Filter\Resize;
+use stratease\ImagiFly\Util\File;
+use stratease\ImagiFly\Filter\FilterInterface;
 use Symfony\Component\Finder\Tests\Expression\RegexTest;
 
 class Builder extends ConfigurableObject

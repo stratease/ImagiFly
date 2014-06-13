@@ -1,6 +1,6 @@
 <?php
-namespace stratease\ImageBuilder\Filter;
-use stratease\ImageBuilder\Filter\FilterInterface;
+namespace stratease\ImagiFly\Filter;
+use stratease\ImagiFly\Filter\FilterInterface;
 use Intervention\Image\Image;
 abstract class BaseFilter implements FilterInterface {
     /**

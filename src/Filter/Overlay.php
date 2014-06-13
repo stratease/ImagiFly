@@ -1,7 +1,7 @@
 <?php
-namespace stratease\ImageBuilder\Filter;
+namespace stratease\ImagiFly\Filter;
 use Intervention\Image\Image;
-use stratease\ImageBuilder\Filter\BaseFilter;
+use stratease\ImagiFly\Filter\BaseFilter;
 class Overlay extends BaseFilter
 {
     /**

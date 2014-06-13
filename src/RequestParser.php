@@ -3,10 +3,10 @@
  * @author Edwin Daniels <stratease@gmail.com>
  */
 
-namespace stratease\ImageBuilder;
+namespace stratease\ImagiFly;
 
 
-use stratease\ImageBuilder\Util\ConfigurableObject;
+use stratease\ImagiFly\Util\ConfigurableObject;
 class RequestParser extends ConfigurableObject implements RequestParserInterface
 {
     protected $pathPrepend = 'image-builder';

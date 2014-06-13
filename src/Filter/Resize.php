@@ -1,7 +1,7 @@
 <?php
 
-namespace stratease\ImageBuilder\Filter;
-use stratease\ImageBuilder\Filter\BaseFilter;
+namespace stratease\ImagiFly\Filter;
+use stratease\ImagiFly\Filter\BaseFilter;
 
 class Resize extends BaseFilter {
     public static function getFilterMask() {
