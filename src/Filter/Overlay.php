@@ -118,8 +118,8 @@ class Overlay extends BaseFilter
                     $x = (int)($fourthW - ($img->width() / 2));
                     $y = (int)(($height - $img->height()) / 2);
                     // place background images
-                    $this->canvas->insert($img, $x, $y);
-                    $this->canvas->insert($img, $x + $halfW, $y);
+                    $this->canvas->insert($img, null, $x, $y);
+                    $this->canvas->insert($img, null, $x + $halfW, $y);
                     break;
                 case 1:
                 default:

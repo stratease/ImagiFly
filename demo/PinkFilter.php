@@ -1,7 +1,7 @@
 <?php
 
 use stratease\ImageBuilder\Filter\BaseFilter;
-use Intervention\Image\Image;
+use Intervention\Image\ImageManagerStatic;
 class PinkFilter extends BaseFilter {
 
     public static function getFilterMask()
@@ -16,11 +16,13 @@ class PinkFilter extends BaseFilter {
 
         // yah baby, unicorns make everything better!
         if($add === 'unicorn') {
-            $unicorn = Image::make(__DIR__.'/images/unicorn.png');
+            $unicorn = ImageManagerStatic::make(__DIR__.'/images/unicorn.png');
             // make smaller...
-            $unicorn->resize(75, 75, true);
+            $unicorn->resize(75, 75, function($constraint) {
+                $constraint->aspectRatio();
+            });
             // randomize location it's placed...
-            $this->canvas->insert($unicorn, rand(0, 100), 0);
+            $this->canvas->insert($unicorn, null, rand(0, 100), 0);
         }
 
         return $this->canvas;
