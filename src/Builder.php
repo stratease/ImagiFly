@@ -1,5 +1,6 @@
 <?php
 namespace stratease\ImageBuilder;
+use Intervention\Image\ImageManagerStatic;
 use Intervention\Image\Image;
 use stratease\ImageBuilder\Util\ConfigurableObject;
 use stratease\ImageBuilder\Filter\Resize;
@@ -232,8 +233,8 @@ class Builder extends ConfigurableObject
     }
 
     /**
-     * @param $canvas Image
-     * @param $baseImage Image
+     * @param Image $canvas
+     * @param Image $baseImage
      * @param $filters array
      * @return Image
      */
@@ -300,9 +301,9 @@ class Builder extends ConfigurableObject
         $imageFile = new File($filePath);
 
         // get our main image resource...
-        $image = Image::make($imageFile->getPath());
+        $image = ImageManagerStatic::make($imageFile->getPath());
         // start with base image size
-        $canvas = Image::canvas($imageFile->getWidth(), $imageFile->getHeight());
+        $canvas = ImageManagerStatic::canvas($imageFile->getWidth(), $imageFile->getHeight());
 
         // apply the filters
         $image = $this->applyFilters($canvas, $image, $this->getFilters());

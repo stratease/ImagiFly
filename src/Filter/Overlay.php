@@ -1,17 +1,19 @@
 <?php
 namespace stratease\ImageBuilder\Filter;
+use Intervention\Image\Image;
 use stratease\ImageBuilder\Filter\BaseFilter;
 class Overlay extends BaseFilter
 {
     /**
      * @param $cnt
      * @param string $style
-     * @return \Intervention\Image\Image - The modified canvas object;
+     * @return Image - The modified canvas object;
      */
     public function filter( $cnt, $style = 'triangle')
     {
-        $height = imagesy($this->canvas->resource);
-        $width = imagesx($this->canvas->resource);
+
+        $height = $this->canvas->height();
+        $width = $this->canvas->width();
         $percBackground = .0;
         if($style == 'left'
             || $style == 'right') {
@@ -20,31 +22,37 @@ class Overlay extends BaseFilter
                 $foreGroundImg = clone $this->baseImage;
                 // find out our box size aspect ratio...
                 if($width < $height) {
-                    $h = $height / 2;
+                    $h = (int)($height / 2);
                     $xBox1 = (int) ($width - ($width * $percBackground));
                     $yBox1 = (int) ($h - ($h * $percBackground));
                     $xBox2 = (int) $width;
                     $yBox2 = (int) $h;
                 } else {
-                    $w = $width / 2;
+                    $w = (int)($width / 2);
                     $xBox1 = (int) ($w - ($w * $percBackground));
                     $yBox1 = (int) ($height - ($height * $percBackground));
                     $xBox2 = (int) $w;
                     $yBox2 = (int) $height;
                 }
                 // resize
-                $img->resize($xBox1, $yBox1, true, true);
-                $foreGroundImg->resize($xBox2, $yBox2, true, true);
+                $img->resize($xBox1, $yBox1, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+                $foreGroundImg->resize($xBox2, $yBox2,function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
                 // shift for centering
-                $x2 = (int)(($width / 2) - (imagesx($foreGroundImg->resource) / 2));
-                $y2 = (int)(($height - imagesy($foreGroundImg->resource)) / 2);
-                $halfW = $width / 2;
-                $fourthW = $width / 4;
-                $x = (int)($fourthW - (imagesx($img->resource) / 2));
-                $y = (int)(($height - imagesy($img->resource)) / 2);
+                $x2 = (int)(($width / 2) - ($foreGroundImg->width() / 2));
+                $y2 = (int)(($height - $foreGroundImg->height()) / 2);
+                $halfW = (int)($width / 2);
+                $fourthW = (int)($width / 4);
+                $x = (int)($fourthW - ($img->width() / 2));
+                $y = (int)(($height - $img->height()) / 2);
                 // place background images
                 if($style == 'left') {
-                    $this->canvas->insert($img, $x, $y);
+                    $this->canvas->insert($img, null, $x, $y);
                 } else {
                     $this->canvas->insert($img, $x + $halfW, $y);
                 }
@@ -58,51 +66,57 @@ class Overlay extends BaseFilter
                     $foreGroundImg = clone $this->baseImage;
                     // find out our box size aspect ratio...
                     if($width < $height) {
-                        $h = $height / 2;
+                        $h = (int)($height / 2);
                         $xBox1 = (int) ($width - ($width * $percBackground));
                         $yBox1 = (int) ($h - ($h * $percBackground));
                     } else {
-                        $w = $width / 2;
+                        $w = (int)($width / 2);
                         $xBox1 = (int) ($w - ($w * $percBackground));
                         $yBox1 = (int) ($height - ($height * $percBackground));
                     }
 
                     // resize
-                    $img->resize($xBox1, $yBox1, true, true);
+                    $img->resize($xBox1, $yBox1, function ($constraint) {
+                        $constraint->aspectRatio();
+                        $constraint->upsize();
+                    });
 
                     // shift for centering
-                    $x2 = (int)(($width / 2) - (imagesx($foreGroundImg->resource) / 2));
-                    $y2 = (int)(($height - imagesy($foreGroundImg->resource)) / 2);
-                    $halfW = $width / 2;
-                    $fourthW = $width / 4;
-                    $x = (int)($fourthW - (imagesx($img->resource) / 2));
-                    $y = (int)(($height - imagesy($img->resource)) / 2);
+                    $x2 = (int)(($width / 2) - ($foreGroundImg->width() / 2));
+                    $y2 = (int)(($height - $foreGroundImg->height()) / 2);
+                    $halfW = (int)($width / 2);
+                    $fourthW = (int)($width / 4);
+                    $x = (int)($fourthW - ($img->width() / 2));
+                    $y = (int)(($height - $img->height()) / 2);
                     // place background images
-                    $this->canvas->insert($img, $x, $y);
-                    $this->canvas->insert($img, $x + $halfW, $y);
+                    $this->canvas->insert($img, null, $x, $y);
+                    $this->canvas->insert($img, null, $x + $halfW, $y);
                     // place foreground
-                    $this->canvas->insert($foreGroundImg, $x2, $y2);
+                    $this->canvas->insert($foreGroundImg, null, $x2, $y2);
                     break;
                 case 2:
                     $img = clone $this->baseImage;
 
                     // find out our box size aspect ratio...
                     if($width < $height) {
-                        $h = $height / 2;
+                        $h = (int)($height / 2);
                         $xBox1 = (int) ($width - ($width * $percBackground));
                         $yBox1 = (int) ($h - ($h * $percBackground));
                     } else {
-                        $w = $width / 2;
+                        $w = (int)($width / 2);
                         $xBox1 = (int) ($w - ($w * $percBackground));
                         $yBox1 = (int) ($height - ($height * $percBackground));
                     }
                     // resize
-                    $img->resize($xBox1, $yBox1, true, true);
+                    $img->resize($xBox1, $yBox1, function ($constraint) {
+                        $constraint->aspectRatio();
+                        $constraint->upsize();
+                    });
                     // shift for centering
-                    $halfW = $width / 2;
-                    $fourthW = $width / 4;
-                    $x = (int)($fourthW - (imagesx($img->resource) / 2));
-                    $y = (int)(($height - imagesy($img->resource)) / 2);
+                    $halfW = (int)($width / 2);
+                    $fourthW = (int)($width / 4);
+                    $x = (int)($fourthW - ($img->width() / 2));
+                    $y = (int)(($height - $img->height()) / 2);
                     // place background images
                     $this->canvas->insert($img, $x, $y);
                     $this->canvas->insert($img, $x + $halfW, $y);
