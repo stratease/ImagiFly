@@ -257,7 +257,7 @@ class Builder extends ConfigurableObject
 
         // if no filters wrote the base image on the canvas, we presume that should always be done.. do it now.
         if($baseImageWritten === false) {
-            $canvas->insert($baseImage, 0, 0); // should we center?
+            $canvas->insert($baseImage, null, 0, 0); // should we center?
         }
         return $canvas;
     }
