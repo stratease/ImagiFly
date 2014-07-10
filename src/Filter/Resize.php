@@ -10,11 +10,11 @@ class Resize extends BaseFilter {
     public function filter($width, $height)
     {
         // Resize both the base image
-        $this->baseImage->resize($height, $width, function($constraint) {
+        $this->baseImage->resize($width, $height, function($constraint) {
             $constraint->aspectRatio();
         });
         // .. and canvas
-        $c = $this->canvas->resize($height, $width, function($constraint) {
+        $c = $this->canvas->resize($width, $height, function($constraint) {
             $constraint->aspectRatio();
         });
 
