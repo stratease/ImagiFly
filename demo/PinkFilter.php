@@ -6,7 +6,7 @@ class PinkFilter extends BaseFilter {
 
     public static function getFilterMask()
     {
-        return 'pink';
+        return '/^pink/';
     }
 
     public function filter($add = false)

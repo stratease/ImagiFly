@@ -235,12 +235,27 @@ class Builder extends ConfigurableObject
     /**
      * @param Image $canvas
      * @param Image $baseImage
-     * @param $filters array
+     * @param $filters array Filter name and args to be compiled
      * @return Image
      */
     public function applyFilters(Image $canvas, Image $baseImage, $filters)
     {
-        $baseImageWritten = false;
+        // first check if we have a filter that applies the base image
+        $writeBaseImage = true;
+        foreach($filters as $filter) {
+            // build filter object...
+            if($filterObj = $this->getFilter($filter['filter'])) {
+                if($filterObj->writesBaseImageToCanvas()) {
+                    $writeBaseImage = false;
+                    break;
+                }
+            }
+        }
+        // if no filters wrote the base image on the canvas, we presume that should always be done first.. do it now.
+        if($writeBaseImage === true) {
+            $canvas->insert($baseImage, null, 0, 0); // should we center?
+        }
+        // now apply all filters to canvas
         foreach($filters as $filter) {
             // build filter object...
             if($filterObj = $this->getFilter($filter['filter'])) {
@@ -248,17 +263,9 @@ class Builder extends ConfigurableObject
                 $fArgs = $filterObj->buildArgs($filter);
                 // write filter to our current canvas
                 $canvas = $this->applyFilter($canvas, $baseImage, $filterObj, $fArgs);
-                // check filter flags
-                if(!$baseImageWritten) {
-                    $baseImageWritten = $filterObj->writesBaseImageToCanvas();
-                }
             }
         }
 
-        // if no filters wrote the base image on the canvas, we presume that should always be done.. do it now.
-        if($baseImageWritten === false) {
-            $canvas->insert($baseImage, null, 0, 0); // should we center?
-        }
         return $canvas;
     }
 

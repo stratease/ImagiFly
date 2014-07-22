@@ -9,7 +9,7 @@ class Resize extends BaseFilter {
     }
     public function filter($width, $height)
     {
-        // Resize both the base image
+        // Resize both the base image.. this enforces all future filters from the base image will reflect the resize done
         $this->baseImage->resize($width, $height, function($constraint) {
             $constraint->aspectRatio();
         });
@@ -18,7 +18,6 @@ class Resize extends BaseFilter {
             $constraint->aspectRatio();
         });
 
-        // .. this enforces all future filters from the base image will reflect the resize done
         return $c;
     }
 
